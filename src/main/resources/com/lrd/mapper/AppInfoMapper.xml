@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+  
+<mapper namespace="com.lrd.dao.AppInfoDao">  
+    <sql id="findApp">
+    	from 
+    		app_info a 
+    	JOIN 
+    		data_dictionary df ON a.flatformId = df.valueId
+		JOIN 
+			app_category c1 ON a.categoryLevel1 = c1.id 
+		JOIN 
+			app_category c2 ON a.categoryLevel2 = c2.id 
+		JOIN 
+			app_category c3 ON a.categoryLevel3 = c3.id
+		JOIN 
+			data_dictionary ds ON a.`status`= ds.valueId
+		LEFT JOIN 
+			app_version v ON a.versionId=v.id
+    </sql>
+    <sql id="findAppWhere">
+    	<where>
+    		df.typeCode='APP_FLATFORM' and ds.typeCode='APP_STATUS'
+    		<if test="app.devId != null">and a.devId=#{app.devId}</if> 
+    		<if test="app.softwareName!=null">and a.softwareName like concat('%',#{app.softwareName},'%')</if>
+        	<if test="app.status!=null and app.status!=0">and a.status=#{app.status}</if>
+        	<if test="app.flatformId!=null and app.flatformId!=0">and a.flatformId=#{app.flatformId}</if>
+        	<if test="app.categoryLevel1!=null and app.categoryLevel1!=0">and a.categoryLevel1=#{app.categoryLevel1}</if>
+        	<if test="app.categoryLevel2!=null and app.categoryLevel2!=0">and a.categoryLevel2=#{app.categoryLevel2}</if>
+        	<if test="app.categoryLevel3!=null and app.categoryLevel3!=0">and a.categoryLevel3=#{app.categoryLevel3}</if>
+        </where>
+    </sql>
+    <select id="getAppInfo" resultType="AppInfo" parameterType="AppInfo">
+    	select 
+    		a.*,df.valueName flatformName,c1.categoryName categoryLevel1Name,
+    		c2.categoryName categoryLevel2Name,c3.categoryName categoryLevel3Name,
+    		ds.valueName statusName,v.versionNo versionNo
+    	<include refid="findApp"/>
+    	<where>
+    		df.typeCode='APP_FLATFORM' and ds.typeCode='APP_STATUS'
+    		<if test="devId!=null">and a.devId=#{devId}</if> 
+    		<if test="id!=null">and a.id=#{id}</if>
+    	</where>
+    </select>
+    <select id="apkexist" parameterType="String" resultType="int">
+    	select count(0) from app_info
+    	<where>
+    		<if test="apkname!=null">APKName=#{apkname}</if>
+    	</where>
+    </select>
+    <select id="findAppInfo" resultType="AppInfo">
+    	select 
+    		a.*,df.valueName flatformName,c1.categoryName categoryLevel1Name,
+    		c2.categoryName categoryLevel2Name,c3.categoryName categoryLevel3Name,
+    		ds.valueName statusName,v.versionNo versionNo
+    	<include refid="findApp"/>
+    	<include refid="findAppWhere"/>
+        <if test="pageIndex != null and pageSize!=null and pageSize>0">
+        		 limit #{pageIndex},#{pageSize}
+        </if>
+    </select>
+    <select id="getAppInfoCount" parameterType="AppInfo" resultType="int"> 
+    	select 
+    		COUNT(0)
+    	<include refid="findApp"/>
+    	<include refid="findAppWhere"/>
+    </select>
+    <insert id="add" parameterType="AppInfo">
+    	INSERT INTO
+    		`appinfodb`.`app_info` 
+    			(`id`, `softwareName`, `APKName`,
+    		 	`supportROM`, `interfaceLanguage`, `softwareSize`,
+    		  	`updateDate`, `devId`, `appInfo`,
+    		   	`status`, `onSaleDate`, `offSaleDate`,
+    		    `flatformId`, `categoryLevel3`, `downloads`,
+    		    `createdBy`, `creationDate`, `modifyBy`, 
+    		    `modifyDate`, `categoryLevel1`, `categoryLevel2`, 
+    		    `logoPicPath`, `logoLocPath`, `versionId`) 
+    	VALUES (default, #{softwareName}, #{apkname},
+    	 		#{supportRom}, #{interfaceLanguage}, #{softwareSize}, 
+    	 		#{updateDate}, #{devId}, #{appInfo}, 
+    	 		#{status}, #{onSaleDate}, #{offSaleDate}, 
+    	 		#{flatformId}, #{categoryLevel3}, #{downloads}, 
+    	 		#{createdBy}, #{creationDate}, #{modifyBy}, 
+    	 		#{modifyDate}, #{categoryLevel1}, #{categoryLevel2}, 
+    	 		#{logoPicPath}, #{logoLocPath}, #{versionId})
+   	</insert>
+   	<delete id="delete" parameterType="int">
+		delete from app_info where id = #{id}
+	</delete>
+   	<update id="update" parameterType="AppInfo">
+   		UPDATE
+   			`appinfodb`.`app_info` 
+   		<trim prefix="set" suffixOverrides="," >
+   			<if test="softwareName != null">`softwareName`=#{softwareName}, </if>
+   			<if test="apkname != null">`APKName`=#{apkname}, </if>
+   			<if test="supportRom != null">`supportROM`=#{supportRom}, </if>
+   			<if test="interfaceLanguage != null">`interfaceLanguage`=#{interfaceLanguage}, </if>
+   			<if test="softwareSize != null">`softwareSize`=#{softwareSize}, </if>
+   			<if test="updateDate != null">`updateDate`=#{updateDate}, </if>
+   			<if test="devId != null">`devId`=#{devId}, </if>
+   			<if test="appInfo != null">`appInfo`=#{appInfo}, </if>
+   			<if test="status != null">`status`=#{status}, </if>
+   			<if test="onSaleDate != null">`onSaleDate`=#{onSaleDate}, </if>
+   			<if test="offSaleDate != null">`offSaleDate`=#{offSaleDate}, </if>
+   			<if test="flatformId != null">`flatformId`=#{flatformId}, </if>
+   			<if test="categoryLevel3 != null">`categoryLevel3`=#{categoryLevel3}, </if>
+   			<if test="downloads != null">`downloads`=#{downloads}, </if>
+   			<if test="createdBy != null">`createdBy`=#{createdBy}, </if>
+   			<if test="creationDate != null">`creationDate`=#{creationDate}, </if>
+   			<if test="modifyBy != null">`modifyBy`=#{modifyBy}, </if>
+   			<if test="modifyDate != null">`modifyDate`=#{modifyDate}, </if>
+   			<if test="categoryLevel1 != null">`categoryLevel1`=#{categoryLevel1}, </if>
+   			<if test="categoryLevel2 != null">`categoryLevel2`=#{categoryLevel2}, </if>
+   			<if test="logoPicPath != null">`logoPicPath`=#{logoPicPath}, </if>
+   			<if test="logoLocPath != null">`logoLocPath`=#{logoLocPath}, </if>	
+   			<if test="versionId != null">`versionId`=#{versionId}, </if>	
+   		</trim>
+		WHERE (`id`=#{id});
+   	</update>
+    
+</mapper>

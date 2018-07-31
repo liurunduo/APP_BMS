@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<property name="prefix" value="/WEB-INF/"></property>
+				<property name="suffix" value=".jsp"></property>
+			</bean>    
+   	<!-- <bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+		<property name="favorParameter" value="true" />
+		<property name="parameterName" value="format"></property>
+		<property name="defaultContentType" value="text/html" />
+		<property name="favorPathExtension" value="true" />
+		<property name="ignoreAcceptHeader" value="true" />
+		<property name="mediaTypes">
+			<map>
+				<entry key="html" value="text/html;charset=UTF-8" />
+				<entry key="json" value="application/json;charset=UTF-8" />
+				<entry key="xml" value="application/xml;charset=UTF-8" />
+			</map>
+		</property>
+		<property name="viewResolvers">
+			<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+				<property name="prefix" value="/WEB-INF/"></property>
+				<property name="suffix" value=".jsp"></property>
+			</bean>
+		</property>
+		<property name="defaultViews">
+			<list>
+				jackson
+				<bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView" />
+				xml视图，XStreamMarshaller，可以转换任何形式的java对象，需要添加xStream jar包
+				<bean name="xStreamMarshallingView" class="org.springframework.web.servlet.view.xml.MarshallingView">
+				    <property name="marshaller">
+				        <bean class="org.springframework.oxm.xstream.XStreamMarshaller">  
+			               	 启用annotation
+			               	<property name="autodetectAnnotations" value="true"/>  
+			               	类名别名
+				             <property name="aliases">
+				                <map>
+				                    Account这个类的别名就变成了myBeans，那么转换后的xml中就是myBeans
+				                    <entry key="SmbmsRole" value="com.tcf.entity.SmbmsRole"/>
+				                </map>
+				            </property>
+				            基本属性别名
+				            <property name="fieldAliases">
+				                <map>
+				                    Account中的brithday这个属性
+				                    <entry key="com.tcf.entity.SmbmsRole.id" value="编号"/>
+				                </map>
+				            </property>
+				           </bean>  
+				    </property>
+				</bean>
+			</list>
+		</property>
+	</bean> -->
+   	<bean id="multipartResolver" 
+   		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!--可设置上传文件大小限制，1024*200即200k-->
+ 		<property name="maxUploadSize" value="204800"/>
+		<property name="defaultEncoding" value="UTF-8"/>
+	</bean>
+   	<!-- 开启注解  -->
+   	<context:component-scan base-package="com.lrd.controller" />
+   	<!-- web -->
+   	<mvc:annotation-driven>
+   		<mvc:message-converters>
+   			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+   				<property name="supportedMediaTypes">
+   					<list>
+   						<value>text/html;charset=UTF-8</value>
+   						<value>application/json;charset=UTF-8</value>
+   					</list>
+   				</property>
+   			</bean>
+   			<bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+   				<property name="supportedMediaTypes">
+   					<list>
+   						<value>text/html;charset=UTF-8</value>
+   						<value>application/json</value>
+   					</list>
+   				</property>
+   				<property name="features">
+   					<list>
+   						<!-- 输出Date的日期转换器 -->
+   						<value>WriteDateUseDateFormat</value>
+   					</list>
+   				</property>
+   			</bean>
+   		</mvc:message-converters>
+   	</mvc:annotation-driven>
+   	<mvc:interceptors>
+   		<mvc:interceptor>
+   			<mvc:mapping path="/**"/>
+   			<mvc:exclude-mapping path="/*/login"/>
+   			<mvc:exclude-mapping path="/*/dologin"/>
+   			<mvc:exclude-mapping path="/statics/**"/>
+   			<mvc:exclude-mapping path="/images/**"/>
+   			<bean class="com.lrd.interceptor.UserHandlerInterceptor" />
+   		</mvc:interceptor>
+   	</mvc:interceptors>
+   	<!-- 开启静态资源  js,img,css,html-->
+   	<!-- <mvc:default-servlet-handler/> -->
+   	<mvc:resources location="/" mapping="/**" />
+   	
+</beans>

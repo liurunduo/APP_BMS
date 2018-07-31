@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<!DOCTYPE mapper  
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+  
+<mapper namespace="com.lrd.dao.AppCategoryDao">  
+    <resultMap id="AppCategoryMap" type="AppCategory">
+    	<id column="id" property="id"/>
+    	<association property="parentCategory" javaType="AppCategory">
+    		<id column="p_id"  property="id"/>
+    		<result column="p_categoryCode" property="categoryCode"/>
+    		<result column="p_categoryName" property="categoryName"/>
+    		<result column="p_parentId" property="parentId"/>
+    		<result column="p_createdBy" property="createdBy"/>
+    		<result column="p_creationTime" property="creationTime"/>
+    		<result column="p_modifyBy" property="modifyBy"/>
+    		<result column="p_modifyDate" property="modifyDate"/>
+    	</association>
+    </resultMap>
+    
+    <sql id="selectCategory">
+    	select a.*,b.id p_id,b.categoryCode p_categoryCode,
+			b.categoryName p_categoryName,b.parentId p_parentId,
+			b.createdBy p_createdBy,b.creationTime p_creationTime,
+			b.modifyBy p_modifyBy,b.modifyDate p_modifyDate
+		from app_category a 
+		LEFT JOIN app_category b ON a.parentId=b.id
+    </sql>
+    <select id="getCategoryList" resultMap="AppCategoryMap" parameterType="int">
+    	<include refid="selectCategory"/>
+    	<where>
+    		<if test="parentId!=null"> and a.parentId=#{parentId}</if>
+    	</where>
+    </select>
+    
+</mapper>
