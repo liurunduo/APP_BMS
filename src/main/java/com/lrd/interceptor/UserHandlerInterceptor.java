@@ -44,7 +44,11 @@ public class UserHandlerInterceptor implements HandlerInterceptor{
 		}*/
 		DevUser devUser=(DevUser) request.getSession().getAttribute("devUserSession");
 		BackendUser backendUser=(BackendUser) request.getSession().getAttribute("userSession");
-		if (null == devUser || null ==backendUser) {
+		String url=request.getRequestURI();
+		
+		if (null == devUser && null==backendUser || 
+				null != devUser && null==backendUser && url.indexOf("/manager/")!=-1 || 
+				null != backendUser && null==devUser && url.indexOf("/dev/")!=-1) {
 			response.sendRedirect(request.getContextPath()+"/403.jsp");
 			return false;
 		}
